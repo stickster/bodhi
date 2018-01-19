@@ -35,9 +35,18 @@ def check():
     initialize_db(config.config)
     session = Session()
 
-    updates = models.Update.query.filter(models.Update.status.in_(
-        [models.UpdateStatus.pending, models.UpdateStatus.testing])).order_by(
-        models.Update.id.desc())
+    updates = models.Update.query.filter(
+        models.Update.status.in_(
+            [models.UpdateStatus.pending, models.UpdateStatus.testing])
+    ).filter(
+        models.Update.release_id == models.Release.id
+    ).filter(
+        models.Release.state.in_(
+            [models.ReleaseState.current, models.ReleaseState.pending])
+    ).order_by(
+        models.Update.id.desc()
+    )
+
     for update in updates:
         try:
             update.update_test_gating_status()
